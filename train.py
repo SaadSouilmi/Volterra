@@ -106,6 +106,7 @@ def train(model, optimizer, epochs, desc):
                 if valid_loss < best_validation_loss:
                     print("Checkpoint")
                     torch.save(model.state_dict(), "checkpoint.pth")
+                    best_validation_loss = valid_loss
 
                 logs = f"Epoch: {epoch}, lr = {scheduler.get_last_lr()}, training_loss = {train_loss}, validation_loss = {valid_loss}"
             else:
