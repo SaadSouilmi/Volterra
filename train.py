@@ -33,7 +33,7 @@ implied_vol_config = dict(
     positive=True,
     lr=0.005,
     batch_size=1024,
-    epochs=500,
+    epochs=5000,
 )
 
 model = MLP(
@@ -103,9 +103,10 @@ def train(model, optimizer, epochs, desc):
                         valid_loss += loss.item()
                 valid_loss = valid_loss / len(loader_test)
                 validation_loss.append(valid_loss)
-                if valid_loss < best_validation_loss:
+                """if valid_loss < best_validation_loss:
                     print("Checkpoint")
                     torch.save(model.state_dict(), "checkpoint.pth")
+                    best_validation_loss = valid_loss"""
 
                 logs = f"Epoch: {epoch}, lr = {scheduler.get_last_lr()}, training_loss = {train_loss}, validation_loss = {valid_loss}"
             else:
@@ -113,7 +114,10 @@ def train(model, optimizer, epochs, desc):
             scheduler.step()
             print(logs)
             # progress_bar.update()
-            # progress_bar.set_description(desc=logs)
+            # progress_bar.set_description(desc=logs
+            if epoch % 500 == 0 and epoch > 0:
+                np.save("training_loss_iv", training_loss)
+                np.save("validation_loss_iv", validation_loss)
 
     return training_loss, validation_loss
 
@@ -125,6 +129,7 @@ if __name__ == "__main__":
     print(device)
     # ********************** Implied volatility training ****************************
     model.load_state_dict(torch.load("checkpoint.pth"))
+    model = model.to(device)
     training_loss, validation_loss = train(
         model, optimizer, implied_vol_config["epochs"], "Training Implied Vol"
     )
